@@ -8,7 +8,7 @@ integer = re.compile(r'^[-+]?[0-9]+$')
 real = re.compile(r'^[-+]?[0-9]+\.[0-9]*$')
 sanitize = re.compile('[^0-9a-zA-Z_]+')
 
-DumpName = 'RAN1_20180924.xml.gz'
+DumpName = 'RAN2_20181001.xml.gz'
 
 
 def predict_type(value):
@@ -35,6 +35,7 @@ class Reader:
                 file = gzip.GzipFile(path)
             else:
                 new_path = '.'.join(path.split('.')[:-1])
+                print('Start unpacking Gzip...')
                 with open(new_path, 'wb') as f_in:
                     with gzip.open(path, 'rb') as f_out:
                         shutil.copyfileobj(f_out, f_in)
@@ -47,9 +48,9 @@ class Reader:
 
         self.db = None
         self.cursor = None
-
+        print('%s:%s Start parsing XML...' % divmod(int(time.time() - start_time), 60))
         self.process_tree()
-
+        print('%s:%s Start committing in database...' % divmod(int(time.time() - start_time), 60))
         self.db.commit()
 
     def process_tree(self):
@@ -251,10 +252,10 @@ class Reader:
 if __name__ == "__main__":
 
     start_time = time.time()
-    print('Start processing '+ DumpName)
+    print('Start processing...')
     Reader(path=DumpName, inplace=False)
     minutes, seconds = divmod(int(time.time() - start_time), 60)
     if '.gz' in DumpName:
         remove(DumpName[:DumpName.rfind('.')])
         print('Temporary xml file removed')
-    print('%s parsed for %s min %s sec.' % (DumpName, str(minutes), str(seconds)))
+print('%s min %s sec %s parsed!' % (minutes, seconds, DumpName))
